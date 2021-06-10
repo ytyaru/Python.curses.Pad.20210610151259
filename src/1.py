@@ -12,7 +12,8 @@ class Main:
 #        self.__win = curses.newwin(curses.LINES, curses.COLS)
 #        self.__win = curses.newwin(curses.LINES, curses.COLS, 0, 0)
 #        self.__win = curses.newwin(curses.LINES, curses.COLS, 1, 1)
-        self.__win = curses.newpad(curses.LINES * 3, curses.COLS)
+#        self.__win = curses.newpad(curses.LINES * 3, curses.COLS * 10)
+        self.__win = curses.newpad(100,100)
         self.__init_cursor()
         self.__init_color_pair()
         self.__draw()
@@ -25,15 +26,19 @@ class Main:
         for i in range(1, curses.COLORS):
             curses.init_pair(i, i, curses.COLOR_BLACK)
     def __draw(self):
-        try:
-            for i in range(1, curses.COLORS):
-#                self.__screen.addstr(str(i).rjust(3), curses.A_REVERSE | curses.color_pair(i))
-                self.__win.addstr(str(i).rjust(3), curses.A_REVERSE | curses.color_pair(i))
-        except curses.ERR: pass
+#        try:
+#            for i in range(1, curses.COLORS):
+#                self.__win.addstr(str(i).rjust(3), curses.A_REVERSE | curses.color_pair(i))
+#        except curses.ERR: pass
 #        self.__screen.addstr(7, 0, self.__msg, curses.A_REVERSE | curses.color_pair(self.__color_index))
 #        self.__win.addstr(7, 0, self.__msg, curses.A_REVERSE | curses.color_pair(self.__color_index))
-        self.__win.addstr(7, 1, self.__msg, curses.A_REVERSE | curses.color_pair(self.__color_index))
-        if self.__win.is_wintouched: self.__win.refresh(0, 0, 0, 0, curses.LINES-1, curses.COLS)
+#        self.__win.addstr(7, 1, self.__msg, curses.A_REVERSE | curses.color_pair(self.__color_index))
+        self.__win.addstr(self.__msg)
+#        if self.__win.is_wintouched: self.__win.refresh(0, 0, 0, 0, curses.LINES-1, curses.COLS * 10)
+#        if self.__win.is_wintouched: self.__win.refresh(1, 1, 1, 1, curses.LINES-1, curses.COLS)
+#        self.__win.refresh(1, 1, 1, 1, curses.LINES-1, curses.COLS)
+#        self.__win.refresh(0, 0, 0, 0, curses.LINES-1, curses.COLS * 10)
+        self.__win.refresh(0, 0, 0, 0, curses.LINES-1, curses.COLS)
     def __input(self):
         self.__screen.getkey()
 
