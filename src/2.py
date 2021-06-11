@@ -2,22 +2,16 @@
 # coding: utf8
 import os, curses
 
-# curses.subpad()を使う。なぜか引数を4つ指定しないとエラーになったり何も表示されなくなる。
+# 複数のnewpad()を使う。なぜかoverlay()できない。最後にrefresh()したpadが描画されるようだ。
 class Main:
     def __init__(self, screen, msg, color_index=1):
         self.__screen = screen
         self.__msg = msg
         self.__color_index = color_index
-#        self.__win = curses.newwin(curses.LINES, curses.COLS)
-#        self.__win = screen.subwin(curses.LINES, curses.COLS)
-#        self.__win = screen.subwin(curses.LINES-1, curses.COLS-1)
-#        self.__win = screen.subwin(curses.LINES-1, curses.COLS-1, 0, 0)
-#        self.__win = screen.subwin(curses.LINES, curses.COLS, 0, 0)
-        self.__outer = curses.newpad(curses.LINES, curses.COLS)
-        self.__outer.box()
-        self.__inner = curses.newpad(curses.LINES-2, curses.COLS-2)
         self.__init_cursor()
         self.__init_color_pair()
+        self.__pad1 = curses.newpad(curses.LINES, curses.COLS)
+        self.__pad2 = curses.newpad(curses.LINES, curses.COLS)
         self.__draw()
         self.__input()
     def __init_cursor(self): curses.curs_set(0)
@@ -28,19 +22,34 @@ class Main:
         for i in range(1, curses.COLORS):
             curses.init_pair(i, i, curses.COLOR_BLACK)
     def __draw(self):
-        try:
-            for i in range(1, curses.COLORS):
-#                self.__screen.addstr(str(i).rjust(3), curses.A_REVERSE | curses.color_pair(i))
-#                self.__win.addstr(str(i).rjust(3), curses.A_REVERSE | curses.color_pair(i))
-                self.__inner.addstr(str(i).rjust(3), curses.A_REVERSE | curses.color_pair(i))
-        except curses.ERR: pass
-#        self.__screen.addstr(7, 0, self.__msg, curses.A_REVERSE | curses.color_pair(self.__color_index))
-#        self.__win.addstr(7, 0, self.__msg, curses.A_REVERSE | curses.color_pair(self.__color_index))
-        self.__inner.addstr(7, 0, self.__msg, curses.A_REVERSE | curses.color_pair(self.__color_index))
-#        if self.__win.is_wintouched: self.__win.refresh()
-        if self.__inner.is_wintouched: self.__inner.refresh(0, 0, 0, 0, curses.LINES-2, curses.COLS-2)
+        self.__pad1.addstr(0, 0, 'win1----', curses.A_REVERSE | curses.color_pair(1))
+        self.__pad1.refresh(0,0,0,0,curses.LINES,curses.COLS)
+        self.__pad2.addstr(1, 0, 'win2----', curses.A_REVERSE | curses.color_pair(2))
+        self.__pad2.refresh(0,0,0,0,curses.LINES,curses.COLS)
+#        self.__pad2.overlay(self.__pad1)
+#        self.__pad1.overlay(self.__pad2)
+        """
+        self.__pad1.noutrefresh(0,0,0,0,curses.LINES,curses.COLS)
+        self.__pad2.noutrefresh(0,0,0,0,curses.LINES,curses.COLS)
+        self.__pad1.addstr(0, 0, 'win1', curses.A_REVERSE | curses.color_pair(1))
+        self.__pad2.addstr(1, 0, 'win2', curses.A_REVERSE | curses.color_pair(2))
+        self.__pad2.overlay(self.__pad1)
+        curses.doupdate()
+        """
+
+        """
+        self.__pad1.addstr(0, 0, 'win1----', curses.A_REVERSE | curses.color_pair(1))
+        self.__pad1.refresh(0,0,0,0,curses.LINES,curses.COLS)
+        self.__pad2.addstr(1, 0, 'win2----', curses.A_REVERSE | curses.color_pair(2))
+        self.__pad2.refresh(0,0,0,0,curses.LINES,curses.COLS)
+        self.__pad2.overlay(self.__pad1)
+        """
     def __input(self):
-        self.__screen.getkey()
+#        self.__screen.getkey()
+        self.__pad1.keypad(True)
+        self.__pad1.getkey()
+#        self.__pad2.keypad(True)
+#        self.__pad2.getkey()
 
 
 if __name__ == "__main__":
