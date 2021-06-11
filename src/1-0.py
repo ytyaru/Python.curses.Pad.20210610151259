@@ -3,16 +3,19 @@
 import os, curses
 
 # curses.newpad()を使う。
-# 注意: screen.refresh(), screen.getkey()を使うとダメ。上書きされてしまって何も表示されなくなる。pad.refresh(), pad.getkey()を使うべき。
+# 注意: 
+#   1. screen.refresh(), screen.getkey()を使うとダメ。上書きされてしまって何も表示されなくなる。pad.refresh(), pad.getkey()を使うべき。
+#   2. self.__pad.keypad(True)を使う。さもなくばキー入力ができない。
 class Main:
     def __init__(self, screen, msg, color_index=1):
         self.__screen = screen
         self.__msg = msg
         self.__color_index = color_index
+        self.__x = 0
+        self.__y = 0
         self.__init_cursor()
         self.__init_color_pair()
         self.__pad = curses.newpad(curses.LINES * 3, curses.COLS * 3)
-        self.__draw()
         self.__input()
     def __init_cursor(self): curses.curs_set(0)
     def __init_color_pair(self):
@@ -27,9 +30,19 @@ class Main:
                 self.__pad.addstr(str(i).rjust(3), curses.A_REVERSE | curses.color_pair(i))
         except curses.ERR: pass
         self.__pad.addstr(7, 0, self.__msg, curses.A_REVERSE | curses.color_pair(self.__color_index))
-        self.__pad.refresh(0, 0, 0, 0, curses.LINES-1, curses.COLS-1)
+        self.__pad.refresh(self.__y, self.__x, 0, 0, curses.LINES-1, curses.COLS-1)
+#        self.__pad.refresh(0, 0, 0, 0, curses.LINES-1, curses.COLS-1)
     def __input(self):
-        self.__pad.getkey()
+        self.__draw()
+        self.__pad.keypad(True)
+        while True:
+            key = self.__pad.getch()
+            if   curses.KEY_UP == key: self.__y -= 1 if 0 < self.__y else 0
+            elif curses.KEY_DOWN == key: self.__y += 1 if self.__y < self.__pad.getmaxyx()[0] - curses.LINES else 0
+            elif curses.KEY_LEFT == key: self.__x -= 1 if 0 < self.__x else 0
+            elif curses.KEY_RIGHT == key: self.__x += 1 if self.__x < self.__pad.getmaxyx()[1] - curses.COLS else 0
+            else: break
+            self.__pad.refresh(self.__y, self.__x, 0, 0, curses.LINES-1, curses.COLS-1)
 
 
 if __name__ == "__main__":
