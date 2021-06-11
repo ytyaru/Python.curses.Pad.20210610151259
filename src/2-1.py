@@ -13,7 +13,9 @@ class Main:
         self.__init_cursor()
         self.__init_color_pair()
         self.__pad = curses.newpad(curses.LINES * 3, curses.COLS * 3)
-        self.__subpad = self.__pad.subpad(curses.LINES * 3-1, curses.COLS * 3-1)
+#        self.__subpad = self.__pad.subpad(curses.LINES * 3-1, curses.COLS * 3-1)
+        self.__subpad = self.__pad.subpad(curses.LINES * 3, curses.COLS * 3, 0, 0)
+#        self.__subpad = self.__pad.subpad(100,100)
         self.__draw()
         self.__input()
     def __init_cursor(self): curses.curs_set(0)
@@ -24,18 +26,16 @@ class Main:
         for i in range(1, curses.COLORS):
             curses.init_pair(i, i, curses.COLOR_BLACK)
     def __draw(self):
-#        self.__pad.addstr('newpad')
-#        self.__subpad.move(2, 1)
-#        self.__subpad.setsyx(2, 1)
+        self.__pad.addstr('newpad', curses.A_REVERSE | curses.color_pair(1))
+        self.__subpad.move(1, 0)
+        self.__subpad.addstr('subpad', curses.A_REVERSE | curses.color_pair(2))
+        self.__subpad.move(3, 0)
         try:
             for i in range(1, curses.COLORS):
-#                self.__pad.addstr(str(i).rjust(3), curses.A_REVERSE | curses.color_pair(i))
                 self.__subpad.addstr(str(i).rjust(3), curses.A_REVERSE | curses.color_pair(i))
         except curses.error: pass
 #        except curses.ERR: pass
-        self.__pad.addstr(7, 0, self.__msg, curses.A_REVERSE | curses.color_pair(self.__color_index))
-#        self.__subpad.addstr(7, 0, self.__msg, curses.A_REVERSE | curses.color_pair(self.__color_index))
-#        self.__pad.refresh(0, 0, 0, 0, curses.LINES-1, curses.COLS-1)
+        self.__subpad.addstr(7, 0, self.__msg, curses.A_REVERSE | curses.color_pair(self.__color_index))
         self.__subpad.refresh(0, 0, 0, 0, curses.LINES-1, curses.COLS-1)
     def __input(self):
         self.__pad.keypad(True)
