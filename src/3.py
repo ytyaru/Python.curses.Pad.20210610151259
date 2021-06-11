@@ -2,17 +2,14 @@
 # coding: utf8
 import os, curses
 
-# curses.doupdate()を使う。window.refresh()でも行われるため、２つ以上のwindowがないと効果がない？
+# なぜかpadでnoutrefresh()を使って一括描画更新できない。
 class Main:
     def __init__(self, screen, msg, color_index=1):
         self.__screen = screen
         self.__msg = msg
         self.__color_index = color_index
-#        self.__win = curses.newwin(curses.LINES, curses.COLS)
-#        self.__win = screen.subwin(curses.LINES, curses.COLS)
-#        self.__win = screen.subwin(curses.LINES-1, curses.COLS-1)
-#        self.__win = screen.subwin(curses.LINES-1, curses.COLS-1, 0, 0)
-        self.__win = screen.subwin(curses.LINES, curses.COLS, 0, 0)
+        self.__newpad = curses.newpad(curses.LINES, curses.COLS)
+        self.__subpad = self.__newpad.subpad(curses.LINES, curses.COLS, 0, 0)
         self.__init_cursor()
         self.__init_color_pair()
         self.__draw()
@@ -26,17 +23,20 @@ class Main:
             curses.init_pair(i, i, curses.COLOR_BLACK)
     def __draw(self):
         try:
-            self.__win.noutrefresh()
+#            self.__newpad.noutrefresh(0,0,0,0,curses.LINES, curses.COLS)
+#            self.__subpad.noutrefresh(0,0,0,0,curses.LINES, curses.COLS)
             for i in range(1, curses.COLORS):
-#                self.__screen.addstr(str(i).rjust(3), curses.A_REVERSE | curses.color_pair(i))
-                self.__win.addstr(str(i).rjust(3), curses.A_REVERSE | curses.color_pair(i))
+                self.__subpad.addstr(str(i).rjust(3), curses.A_REVERSE | curses.color_pair(i))
+#                self.__newpad.addstr(str(i).rjust(3), curses.A_REVERSE | curses.color_pair(i))
         except curses.ERR: pass
-#        self.__screen.addstr(7, 0, self.__msg, curses.A_REVERSE | curses.color_pair(self.__color_index))
-        self.__win.addstr(7, 0, self.__msg, curses.A_REVERSE | curses.color_pair(self.__color_index))
-#        if self.__win.is_wintouched: self.__win.refresh()
-        curses.doupdate()
+        self.__subpad.addstr(7, 0, self.__msg, curses.A_REVERSE | curses.color_pair(self.__color_index))
+
+#        self.__newpad.refresh(0,0,0,0,curses.LINES, curses.COLS)
+        self.__subpad.refresh(0,0,0,0,curses.LINES, curses.COLS)
+#        curses.doupdate()
     def __input(self):
-        self.__screen.getkey()
+        self.__newpad.keypad(True)
+        self.__newpad.getkey()
 
 
 if __name__ == "__main__":
