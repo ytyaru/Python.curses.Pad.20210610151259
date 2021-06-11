@@ -3,6 +3,7 @@
 import os, curses
 
 # なぜかpadでnoutrefresh()を使って一括描画更新できない。
+# おそらく「複数のpadをoverlayできない（最後に描画したpadだけ表示される）」問題が起因している。newpadでルートをつくり、そこからsubpadする使い方になるのだろう。
 class Main:
     def __init__(self, screen, msg, color_index=1):
         self.__screen = screen
